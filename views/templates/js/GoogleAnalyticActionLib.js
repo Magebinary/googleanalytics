@@ -1,7 +1,5 @@
 var GoogleAnalyticEnhancedECommerce = {
 
-
-    //sssss
     setCurrency: function(Currency) {
 
         ga('set', '&cu', Currency);
@@ -19,7 +17,10 @@ var GoogleAnalyticEnhancedECommerce = {
             for (var key in Product) {
                 for (i = 0; i < ProductFieldObject.length; i++) {
                     if (key.toLowerCase() == ProductFieldObject[i]) {
-                        Products[key.toLowerCase()] = Product[key];
+                        if(Product[key] != null) {
+                            Products[key.toLowerCase()] = Product[key];
+                        }
+                        
                     }
                 }
 
@@ -102,21 +103,22 @@ var GoogleAnalyticEnhancedECommerce = {
 	**/
 
         ga('ec:setAction', 'refund', {
-            'id': Order.Id // Transaction ID is only required field for full refund.
+            'id': Order.id // Transaction ID is only required field for full refund.
         });
     },
 
 
-    refundByProduct: function(Product,Order) {
+    refundByProduct: function(Order) {
     
     /**
 	 Refund a single product.	
 	**/
-        this.add(Product);
+        //this.add(Product);
 
         ga('ec:setAction', 'refund', {
             'id': Order.Id, // Transaction ID is required for partial refund.
         });
+        ga('send', 'pageview');
 		
 
     },
@@ -142,29 +144,50 @@ var GoogleAnalyticEnhancedECommerce = {
 
    },
 
-    addPurchase: function(Product, Order) {
+    addPurchase: function(Order) {
 
-        this.add(Product);
+        //this.add(Product);
         ga('ec:setAction', 'purchase', Order);
-        ga('send', 'pageview');
+        ga('send', 'pageview', {
+            'hitCallback': function() {
+                $.get( Order.url,  { orderid:  Order.id  });
+            }
+        });
+
+    },
+	
+	
+	addTransaction: function(transaction) {
+
+       ga('ecommerce:addTransaction', {
+		  'id': transaction.orderid,                     
+		  'affiliation': transaction.storename, 
+		  'revenue': transaction.grandtotal,      
+		  'shipping': transaction.shipping,      
+		  'tax': transaction.tax                    
+		});
+
+
+		ga('send', 'transaction', {
+			'hitCallback': function() {
+				$.get( transaction.url,  { orderid:  transaction.orderid  }  );
+			}
+		});
+
 
     },
 
-    addCheckout: function(Product) {
+    addCheckout: function() {
 
-        this.add(Product);
+        ga('ec:setAction','checkout');
+        ga('send', 'pageview');
 
         /***
         ga('ec:setAction','checkout',{
             'step': 1
             //'option':'Visa'
         });
-***/
-
-        ga('ec:setAction','checkout');
-
-        ga('send', 'pageview');
-
+        ***/
     }
 
 
