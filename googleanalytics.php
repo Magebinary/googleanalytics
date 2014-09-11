@@ -82,7 +82,7 @@ class Googleanalytics extends Module
 		Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'googleanalytics`');
 		//create transaction table
 		$query = 'CREATE TABLE `'._DB_PREFIX_.'googleanalytics` (
-		`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+		`id_google_analytics` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 		`id_order` INT NOT NULL ,
 		`sent` Boolean,
 		`date_added` DateTime
