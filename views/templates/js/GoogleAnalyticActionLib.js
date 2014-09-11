@@ -20,7 +20,7 @@ var GoogleAnalyticEnhancedECommerce = {
                         if(Product[key] != null) {
                             Products[key.toLowerCase()] = Product[key];
                         }
-                        
+
                     }
                 }
 
@@ -97,7 +97,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
     refundByOrderId: function(Order) {
-    
+
     /**
 	Refund an entire transaction.
 	**/
@@ -109,9 +109,9 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
     refundByProduct: function(Order) {
-    
+
     /**
-	 Refund a single product.	
+	 Refund a single product.
 	**/
         //this.add(Product);
 
@@ -119,32 +119,32 @@ var GoogleAnalyticEnhancedECommerce = {
             'id': Order.Id, // Transaction ID is required for partial refund.
         });
         ga('send', 'pageview');
-		
+
 
     },
 
     addProductClick: function(Product) {
 
     //console.log(Product);
-	
+
 	$('a[href$="'+Product.url+'"]').on("click", function(event) {
-        
+
 		GoogleAnalyticEnhancedECommerce.add(Product);
         ga('ec:setAction', 'click', {
             list: Product.list
         });
- 
+
         ga('send', 'event', 'Product Click', 'click', Product.list, {
             'hitCallback': function() {
                 return !ga.loaded;
             }
         });
-	
+
 	});
 
    },
 
-    addPurchase: function(Order) {
+    addTransaction: function(Order) {
 
         //this.add(Product);
         ga('ec:setAction', 'purchase', Order);
@@ -153,27 +153,6 @@ var GoogleAnalyticEnhancedECommerce = {
                 $.get( Order.url,  { orderid:  Order.id  });
             }
         });
-
-    },
-	
-	
-	addTransaction: function(transaction) {
-
-       ga('ecommerce:addTransaction', {
-		  'id': transaction.orderid,                     
-		  'affiliation': transaction.storename, 
-		  'revenue': transaction.grandtotal,      
-		  'shipping': transaction.shipping,      
-		  'tax': transaction.tax                    
-		});
-
-
-		ga('send', 'transaction', {
-			'hitCallback': function() {
-				$.get( transaction.url,  { orderid:  transaction.orderid  }  );
-			}
-		});
-
 
     },
 
