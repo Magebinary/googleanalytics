@@ -326,7 +326,7 @@ class Googleanalytics extends Module
 						'tax' => $order->total_paid_tax_incl - $order->total_paid_tax_excl,
 						'url' => $this->context->link->getModuleLink('googleanalytics','ajax'),
 				);
-			$ga_scripts = $this->addOrderPurchase($order_products, $transaction);
+			$ga_scripts = $this->addTransaction($order_products, $transaction);
 
 			return $this->runJS($ga_scripts);
 
@@ -579,14 +579,14 @@ class Googleanalytics extends Module
 
 	}
 
-	public function addOrderPurchase($products,$order)
+	public function addTransaction($products,$order)
 	{
 		$js = '';
 		foreach($products as $product)
 		{
 			$js .= 'MBG.add('.json_encode($product).');';
 		}
-		$js .= 'MBG.addPurchase('.json_encode($order).');';
+		$js .= 'MBG.addTransaction('.json_encode($order).');';
 
 		return $js;
 	}
