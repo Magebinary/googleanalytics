@@ -773,7 +773,7 @@ class Googleanalytics extends Module
 			!$this->registerHook('displayShoppingCart'))
 	**/
 
-	public function hookActionCartSave($params)
+	public function hookActionCartSave()
 	{
 
 
