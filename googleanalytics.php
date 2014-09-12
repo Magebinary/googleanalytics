@@ -85,7 +85,7 @@ class Googleanalytics extends Module
 		`id_google_analytics` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 		`id_order` INT NOT NULL ,
 		`sent` Boolean,
-		`date_added` DateTime
+		`date_add` DateTime
 		)';
 
 		if (!Db::getInstance()->Execute($query))
@@ -311,7 +311,7 @@ class Googleanalytics extends Module
 
 			if ($ga_order_record == null)
 			{
-				Db::getInstance()->execute('insert into  `'._DB_PREFIX_.'googleanalytics` (id_order, sent, date_added) values ('.$orderid.',false,'.time().') ');
+				Db::getInstance()->execute('insert into  `'._DB_PREFIX_.'googleanalytics` (id_order, sent, date_add) values ('.$orderid.',false,'.time().') ');
 				$ga_order_record = Db::getInstance()->getRow('select sent from  `'._DB_PREFIX_.'googleanalytics` where id_order = '.(int)$orderid);
 			}
 			//var_dump($order);die();
