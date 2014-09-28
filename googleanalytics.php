@@ -348,11 +348,6 @@ class Googleanalytics extends Module
 	**/
 		$controller_name = Tools::getValue('controller');
 
-		$products = $this->context->smarty->getTemplateVars('products');
-
-		//$this->debug($products);
-		//var_dump($products);
-		$products = $this->wrapProducts($products);
 
 
 
@@ -364,7 +359,7 @@ class Googleanalytics extends Module
 		{
 
 
-			$ga_scripts .= $this->addProductImpressionAndClicks($products);
+			//$ga_scripts .= $this->addProductImpressionAndClicks($products);
 
 			/*mesuring a product view end*/
 
@@ -390,6 +385,10 @@ class Googleanalytics extends Module
 
 		if ($controller_name == 'order' and Tools::getValue('step') == '1')
 		{
+
+			$products = $this->context->smarty->getTemplateVars('products');
+
+			$products = $this->wrapProducts($products);
 			$ga_scripts .= $this->addProductFromCheckout($products);
 		}
 
@@ -650,12 +649,16 @@ class Googleanalytics extends Module
 		/***measuring a product details view start*****/
 		$controller_name = Tools::getValue('controller');
 
-		if ($controller_name == 'product')
+		if ($controller_name == 'product' && strstr($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']))
 		{
 			//add product view
+			$js = '';
 			$id_product = (int)Tools::getValue('id_product');
 			$ga_product = $this->wrapProduct($id_product);
-			return $this->runJS("MBG.addProductDetailView(".json_encode($ga_product).");");
+			$js .= "MBG.addProductDetailView(".json_encode($ga_product).");";
+			$js .= $this->addProductImpressionAndClicks(array($ga_product));
+
+			return $this->runJS($js);
 		}
 
 		return null;
