@@ -393,7 +393,23 @@ class Googleanalytics extends Module
 			$ga_scripts .= $this->addProductFromCheckout($products);
 		}
 
-		//var_dump($ga_scripts);
+		if ($controller_name == 'order' )
+		{
+			$step = Tools::getValue('step');
+			if(empty($step))
+				$step = 0;
+
+			$ProcessFlow = array('Summary','Address','Shipping','Payment','Succesful');
+			if($step<sizeof($ProcessFlow))
+				$ga_scripts .= $this->addCheckout($ProcessFlow[$step]);			
+		}
+
+		if ($controller_name == 'order-confirmation' )
+		{
+			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));	
+		}
+
+
 		return $this->runJS($ga_scripts);
 
 		//return $this->display(__FILE__, 'hookDisplayFooter.tpl');
@@ -469,10 +485,12 @@ class Googleanalytics extends Module
 	}
 
 
-	public function wrapProducts($products,$extras)
+	public function wrapProducts($products,$extras=array())
 	{
 		//$this->debug($products);
 		$result_products = array();
+		if(!is_array($products))
+			return;
 		foreach($products as $index => $product)
 		{
 			$result_products[] = $this->wrapProduct($product,$extras,$index);
@@ -484,26 +502,27 @@ class Googleanalytics extends Module
 	}
 
 
-	public function wrapProduct($product,$extras,$index)
+	public function wrapProduct($product,$extras,$index=0)
 	{
 
-		$position = $index ? :'0';
+		$position = $index ? $index :'0';
 		$product_qty = 1;
+		$variant = null;
 
-		if($product['attributes_small']) {
+		if(isset($product['attributes_small'])) {
 			$variant = $product['attributes_small'];
 		}
-		if($extras['attributes_small']) {
+		if(isset($extras['attributes_small'])) {
 			$variant = $extras['attributes_small'];
 		}
 		/** Product Qty ***/
-	    if($extras['qty'])
+	    if(isset($extras['qty']))
 		{
 
 			$product_qty = $extras['qty'];
 		}
 
-		elseif($product['cart_quantity'])
+		elseif(isset($product['cart_quantity']))
 		{
 			$product_qty = $product['cart_quantity'];
 
@@ -518,7 +537,7 @@ class Googleanalytics extends Module
 
 
 
-		}elseif (is_int($product['product_id'])) {
+		}elseif (isset($product['product_id']) && is_int($product['product_id'])) {
 			$product = new Product($product['product_id'], true, $this->context->language->id, $this->context->shop->id);
 			if($product['product_quantity'])
 			{
@@ -529,13 +548,14 @@ class Googleanalytics extends Module
 		elseif(!empty($product["id_product"])) {
 
 			/** Product Link ***/
-			$product_link =  $product['link'] ? :'';
+			if(isset($product['link']))
+			{
+				$product_link =  $product['link'] ? :'';
 
+				$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
 
-			$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
-
-			$product->link = $product_link;
-
+				$product->link = $product_link;
+			}
 
 
 
@@ -546,19 +566,18 @@ class Googleanalytics extends Module
 		}
 
 
-
-
-
 		if (Validate::isLoadedObject($product))
 		{
 			$category = new Category($product->id_category_default);
 			$manufactory = Manufacturer::getNameById((int)$product->id_manufacturer);
 
 			$producttype = 'typical';
-			if ($product->pack == 1)
+			if (isset($product->pack) && $product->pack == 1)
 				$producttype = 'pack';
-			if ($product->vitural == 1)
+			if (isset($product->vitural) && $product->vitural == 1)
 				$producttype = 'vitural';
+
+			$product_link = isset($product->link)? $product->link : '';
 
 			$ga_product = array(
 				'id'=>$product->reference,
@@ -570,7 +589,7 @@ class Googleanalytics extends Module
 				'position'=>$position,
 				'quantity'=>$product_qty,
 				'list'=>Tools::getValue('controller'),
-				'url'=>$product->link,
+				'url'=>$product_link,
 				'price'=>number_format($product->price,'2')
 			);
 			return $ga_product;
@@ -594,21 +613,26 @@ class Googleanalytics extends Module
 	public function addProductImpressionAndClicks($products)
 	{
 
+		$js = '';
+		foreach($products as $product) {
+			$js .=  "MBG.addProductImpression(".json_encode($product).");" . "MBG.addProductClick(".json_encode($product).");";
+		}
+		return $js;
+	}
 
-			foreach($products as $product) {
-
-				$js .=  "MBG.addProductImpression(".json_encode($product).");" . "MBG.addProductClick(".json_encode($product).");";
-
-			}
-
-			return $js;
-
+	public function addCheckout($step)
+	{
+		$js = '';
+		$js .=  "MBG.addCheckout('".$step."'');";
+		return $js;
 	}
 
 	public function addProductFromCheckout($products)
 	{
 		$js = '';
 		//addCheckout
+		if(!is_array($products))
+			return;
 		foreach($products as $product) {
 			$js .=  "MBG.add(".json_encode($product).");";
 
@@ -778,8 +802,8 @@ class Googleanalytics extends Module
 
 	public function hookActionCartSave()
 	{
-
-
+		if(!isset($this->context->cart))
+			return;
 
 		$Cart = array(
 			'addAction' => Tools::getValue('add') ? 'add':'',
