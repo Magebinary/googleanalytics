@@ -187,8 +187,8 @@ class Googleanalytics extends Module
 				//add google analytics
 				array(
 					'type' => 'text',
-					'label' => $this->l('Web Tracking Id'),
-					'name' => 'googleanalytics_webtrackingid',
+					'label' => $this->l('Business Account ID'),
+					'name' => 'GA_ACCOUNT_ID',
 					'size' => 20,
 					'required' => true,
 					'hint'=>'Get tracking Id from google'
@@ -202,7 +202,7 @@ class Googleanalytics extends Module
 		);
 		// Load current value
 		$helper->fields_value['googleanalytics_enable'] = Configuration::get('googleanalytics_enable');
-		$helper->fields_value['googleanalytics_webtrackingid'] = Configuration::get('googleanalytics_webtrackingid');
+		$helper->fields_value['GA_ACCOUNT_ID'] = Configuration::get('GA_ACCOUNT_ID');
 
 		return $helper->generateForm($fields_form);
 
@@ -218,12 +218,12 @@ class Googleanalytics extends Module
 		{
 			$error = false;
 			$googleanalytics_enable = Tools::getValue('googleanalytics_enable');
-			$googleanalytics_webtrackingid = Tools::getValue('googleanalytics_webtrackingid');
+			$GA_ACCOUNT_ID = Tools::getValue('GA_ACCOUNT_ID');
 
 			if (!$error)
 			{
 				Configuration::updateValue('googleanalytics_enable', $googleanalytics_enable);
-				Configuration::updateValue('googleanalytics_webtrackingid', $googleanalytics_webtrackingid);
+				Configuration::updateValue('GA_ACCOUNT_ID', $GA_ACCOUNT_ID);
 				$output .= $this->displayConfirmation($this->l('Settings updated'));
 			}
 		}
@@ -239,12 +239,12 @@ class Googleanalytics extends Module
 		//verified
 		//echo "<br><font color=red size=30px>google analytics hook display header</font><br>";
 
-		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('googleanalytics_webtrackingid') != '')
+		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('GA_ACCOUNT_ID') != '')
 		{
 
 			$this->context->smarty->assign(
 				array(
-					'googleanalytics_webtrackingid' => Configuration::get('googleanalytics_webtrackingid'),
+					'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
 				)
 			);
 
@@ -712,11 +712,11 @@ class Googleanalytics extends Module
 	{
 		$this->context->controller->addJs($this->_path.'views/templates/js/'.'GoogleAnalyticActionLib.js');
 
-		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('googleanalytics_webtrackingid') != '')
+		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('GA_ACCOUNT_ID') != '')
 		{
 			$this->context->smarty->assign(
 				array(
-					'googleanalytics_webtrackingid' => Configuration::get('googleanalytics_webtrackingid'),
+					'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
 				)
 			);
 
