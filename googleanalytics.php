@@ -466,6 +466,22 @@ class Googleanalytics extends Module
 	*/
 	public function wrapProduct($product,$extras,$index=0)
 	{
+		$cache_id = '';
+		if(isset($product->id))
+			$cache_id = $product->id;
+		else
+			$cache_id  = $product['product_id'];
+		else
+			$cache_id = $product['product_id'];
+		else
+			return;
+
+		$cache_id = 'GoogleAnalytics_product_'.$cache_id;
+
+
+		if($ga = Cache::retrieve($cache_id))
+			return $ga;
+
 
 		$position = $index ? $index :'0';
 		$product_qty = 1;
@@ -539,6 +555,7 @@ class Googleanalytics extends Module
 				'url'=>$product_link,
 				'price'=>number_format($product->price,'2')
 			);
+			Cache::store($cache_key, $ga_product);
 			return $ga_product;
 		}
 		return null;
