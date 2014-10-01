@@ -621,7 +621,7 @@ class Googleanalytics extends Module
 	public function hookDisplayFooterProduct()
 	{
 		$controller_name = Tools::getValue('controller');
-		if ($controller_name == 'product' && strstr($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']))
+		if ($controller_name == 'product' && strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])>0)
 		{
 			//add product view
 			$js = '';
