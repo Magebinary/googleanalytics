@@ -470,8 +470,8 @@ class Googleanalytics extends Module
 		if(isset($product->id))
 			$cache_id = $product->id;
 		elseif(is_int($product))
-			$cache_id  = $product['product_id'];
-		elseif(isset($product["id_product"]))
+			$cache_id  = $product;
+		elseif(isset($product["product_id"]))
 			$cache_id = $product['product_id'];
 		else
 			return;
