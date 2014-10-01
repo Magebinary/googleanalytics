@@ -469,9 +469,9 @@ class Googleanalytics extends Module
 		$cache_id = '';
 		if(isset($product->id))
 			$cache_id = $product->id;
-		else
+		elseif(is_int($product))
 			$cache_id  = $product['product_id'];
-		else
+		elseif(isset($product["id_product"]))
 			$cache_id = $product['product_id'];
 		else
 			return;
@@ -555,7 +555,7 @@ class Googleanalytics extends Module
 				'url'=>$product_link,
 				'price'=>number_format($product->price,'2')
 			);
-			Cache::store($cache_key, $ga_product);
+			Cache::store($cache_id, $ga_product);
 			return $ga_product;
 		}
 		return null;
