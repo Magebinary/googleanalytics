@@ -85,22 +85,22 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
     addProductImpression: function(Product) {
-		//console.log(Product);
+        //console.log(Product);
         this.add(Product,'',true);
         ga('send', 'pageview');
 
     },
 
-	/**
-	id, type, affiliation, revenue, tax, shipping and coupon.
-	**/
+    /**
+    id, type, affiliation, revenue, tax, shipping and coupon.
+    **/
 
 
     refundByOrderId: function(Order) {
 
     /**
-	Refund an entire transaction.
-	**/
+    Refund an entire transaction.
+    **/
 
         ga('ec:setAction', 'refund', {
             'id': Order.id // Transaction ID is only required field for full refund.
@@ -111,8 +111,8 @@ var GoogleAnalyticEnhancedECommerce = {
     refundByProduct: function(Order) {
 
     /**
-	 Refund a single product.
-	**/
+     Refund a single product.
+    **/
         //this.add(Product);
 
         ga('ec:setAction', 'refund', {
@@ -125,7 +125,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
     addProductClick: function(Product) {
 
-		this.add(Product);
+        this.add(Product);
         ga('ec:setAction', 'click', {
             list: Product.list
         });
