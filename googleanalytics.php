@@ -385,12 +385,12 @@ class Googleanalytics extends Module
 
 			$ProcessFlow = array('Summary','Address','Shipping','Payment','Succesful');
 			if($step<sizeof($ProcessFlow))
-				$ga_scripts .= $this->addCheckout($ProcessFlow[$step]);			
+				$ga_scripts .= $this->addCheckout($ProcessFlow[$step]);
 		}
 
 		if ($controller_name == 'order-confirmation' )
 		{
-			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));	
+			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));
 		}
 
 
@@ -469,18 +469,21 @@ class Googleanalytics extends Module
 		$cache_id = '';
 		if(isset($product->id))
 			$cache_id = $product->id;
+		elseif(isset($product['product_id']))
+			$cache_id = $product['product_id'];
+		elseif(isset($product['id_product']))
+			$cache_id = $product['id_product'];
 		elseif(is_int($product))
 			$cache_id  = $product;
-		elseif(isset($product["product_id"]))
-			$cache_id = $product['product_id'];
 		else
 			return;
 
 		$cache_id = 'GoogleAnalytics_product_'.$cache_id;
 
 
-		if($ga = Cache::retrieve($cache_id))
+		if($ga = Cache::retrieve($cache_id)){
 			return $ga;
+		}
 
 
 		$position = $index ? $index :'0';
@@ -745,7 +748,7 @@ class Googleanalytics extends Module
 
 		$this->context->cookie->__set('ga_admin_refund', $ga_scripts);
 	}
-	
+
 
 	 /**
 	 * hook save cart event to implement addtocart and remove from cart functionality
