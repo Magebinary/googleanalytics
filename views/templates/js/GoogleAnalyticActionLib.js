@@ -125,11 +125,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
     addProductClick: function(Product) {
 
-    //console.log(Product);
-
-	$('a[href$="'+Product.url+'"]').on("click", function(event) {
-
-		GoogleAnalyticEnhancedECommerce.add(Product);
+		this.add(Product);
         ga('ec:setAction', 'click', {
             list: Product.list
         });
@@ -139,8 +135,6 @@ var GoogleAnalyticEnhancedECommerce = {
                 return !ga.loaded;
             }
         });
-
-	});
 
    },
 
@@ -164,7 +158,7 @@ var GoogleAnalyticEnhancedECommerce = {
         });
         ga('send', 'pageview');
 
-     
+
     }
 
 

@@ -303,8 +303,6 @@ class Googleanalytics extends Module
 				$order_products[] = $this->wrapProduct((int)$order_product['product_id'],array('qty'=>$order_product['product_quantity']));
 			}
 
-			//var_dump($order_products); die();
-
 			$ga_order_record = Db::getInstance()->getRow('select sent from  `'._DB_PREFIX_.'googleanalytics` where id_order = '.(int)$orderid);
 
 			if ($ga_order_record == null)
@@ -312,7 +310,7 @@ class Googleanalytics extends Module
 				Db::getInstance()->execute('insert into  `'._DB_PREFIX_.'googleanalytics` (id_order, sent, date_add) values ('.$orderid.',false,'.time().') ');
 				$ga_order_record = Db::getInstance()->getRow('select sent from  `'._DB_PREFIX_.'googleanalytics` where id_order = '.(int)$orderid);
 			}
-			//var_dump($order);die();
+
 			if ($ga_order_record['sent'] != true)
 			{
 				$transaction = array(
@@ -338,13 +336,14 @@ class Googleanalytics extends Module
 
 	public function hookDisplayFooter()
 	{
-	/***Measuring a product view - Category page
-	- Includes a JavaScript code on the product list page (category and sub-category) to send the product's details:
-	o Product(s): id, name, type, category, brand, variant, list and position in the list.
-	4
-	- The “others” listing (home featured products, best sellers and news products) will display the details by re-implementing the way to get the products list from the Module into the Google Analytics Module.
-	**/
 		$controller_name = Tools::getValue('controller');
+
+		$products = $this->context->smarty->getTemplateVars('products');
+
+		if (!is_array($products)) {
+			$products = $this->wrapProducts($products);
+		}
+
 
 		// return category page product list
 		// get variables assigned by smarty
@@ -366,33 +365,27 @@ class Googleanalytics extends Module
 			$ga_scripts.=$cart_actions;
 			$this->context->cookie->__unset('ga_cart');
 		}
-		// hook add remove from cart ends
-
-		if ($controller_name == 'order' and Tools::getValue('step') == '1')
-		{
-
-			$products = $this->context->smarty->getTemplateVars('products');
-
-			$products = $this->wrapProducts($products);
-			$ga_scripts .= $this->addProductFromCheckout($products);
-		}
 
 		if ($controller_name == 'order' )
 		{
 			$step = Tools::getValue('step');
 			if(empty($step))
+			{
 				$step = 0;
+			}
+			$ga_scripts .= $this->addProductFromCheckout($products, $step);
+			$ga_scripts .= "MBG.addCheckout('".$step."');";
 
-			$ProcessFlow = array('Summary','Address','Shipping','Payment','Succesful');
-			if($step<sizeof($ProcessFlow))
-				$ga_scripts .= $this->addCheckout($ProcessFlow[$step]);
 		}
 
 		if ($controller_name == 'order-confirmation' )
 		{
 			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));
 		}
-
+		if ($controller_name == 'category' || $controller_name == 'search')
+		{
+			$ga_scripts .= $this->addProductImpression($products);
+		}
 
 		return $this->runJS($ga_scripts);
 	}
@@ -413,7 +406,7 @@ class Googleanalytics extends Module
 			$nb = (int)Configuration::get('HOME_FEATURED_NBR');
 			$home_featured_products = $this->wrapProducts($category->getProducts((int)Context::getContext()->language->id, 1, ($nb ? $nb : 8), 'position'));
 
-			$ga_scripts .= $this->addProductImpressionAndClicks($home_featured_products);
+			$ga_scripts .= $this->addProductImpression($home_featured_products);
 		}
 
 		//add new products list
@@ -425,7 +418,7 @@ class Googleanalytics extends Module
 
 				$ga_homenew_product_list = $this->wrapProducts($newProducts);
 
-				$ga_scripts .= $this->addProductImpressionAndClicks($ga_homenew_product_list);
+				$ga_scripts .= $this->addProductImpression($ga_homenew_product_list);
 			}
 		}
 
@@ -440,7 +433,7 @@ class Googleanalytics extends Module
 
 			$ga_homebestsell_product_list = $this->wrapProducts($bestsell_products);
 
-			$ga_scripts .= $this->addProductImpressionAndClicks($ga_homebestsell_product_list);
+			$ga_scripts .= $this->addProductImpression($ga_homebestsell_product_list);
 		}
 
 		return $this->runJS($ga_scripts);
@@ -451,6 +444,7 @@ class Googleanalytics extends Module
 	*/
 	public function wrapProducts($products,$extras=array())
 	{
+
 		$result_products = array();
 		if(!is_array($products))
 			return;
@@ -467,24 +461,27 @@ class Googleanalytics extends Module
 	public function wrapProduct($product,$extras,$index=0)
 	{
 		$cache_id = '';
-		if(isset($product->id))
+		$ga_product = '';
+
+		if(isset($product->id)) {
 			$cache_id = $product->id;
-		elseif(isset($product['product_id']))
+		}
+		elseif(isset($product['product_id'])) {
 			$cache_id = $product['product_id'];
-		elseif(isset($product['id_product']))
+		}
+		elseif(isset($product['id_product'])) {
 			$cache_id = $product['id_product'];
-		elseif(is_int($product))
+		}
+		elseif(is_int($product)) {
 			$cache_id  = $product;
-		else
-			return;
+		}
 
 		$cache_id = 'GoogleAnalytics_product_'.$cache_id;
 
-
-		if($ga = Cache::retrieve($cache_id)){
-			return $ga;
+		if(Cache::isStored($cache_id)) {
+			$ga_product = Cache::retrieve($cache_id);
+			return $ga_product;
 		}
-
 
 		$position = $index ? $index :'0';
 		$product_qty = 1;
@@ -497,13 +494,11 @@ class Googleanalytics extends Module
 			$variant = $extras['attributes_small'];
 		}
 		/** Product Qty ***/
-	    if(isset($extras['qty']))
-		{
+	    if(isset($extras['qty'])) {
 			$product_qty = $extras['qty'];
 		}
 
-		elseif(isset($product['cart_quantity']))
-		{
+		elseif(isset($product['cart_quantity'])) {
 			$product_qty = $product['cart_quantity'];
 		}
 
@@ -528,9 +523,9 @@ class Googleanalytics extends Module
 				$product->link = $product_link;
 			}
 		}
-		else {
-			return null;
-		}
+		//else {
+			//return null;
+		//}
 
 		if (Validate::isLoadedObject($product))
 		{
@@ -558,10 +553,12 @@ class Googleanalytics extends Module
 				'url'=>$product_link,
 				'price'=>number_format($product->price,'2')
 			);
+
 			Cache::store($cache_id, $ga_product);
-			return $ga_product;
+
 		}
-		return null;
+
+		return $ga_product;
 
 	}
 
@@ -582,11 +579,20 @@ class Googleanalytics extends Module
 	/**
 	* add product impression js and product click js
 	*/
-	public function addProductImpressionAndClicks($products)
+	public function addProductImpression($products)
 	{
 		$js = '';
 		foreach($products as $product) {
-			$js .=  "MBG.addProductImpression(".json_encode($product).");" . "MBG.addProductClick(".json_encode($product).");";
+			$js .=  "MBG.addProductImpression(".json_encode($product).");";
+		}
+		return $js;
+	}
+
+	public function addProductClicks($products)
+	{
+		$js = '';
+		foreach($products as $product) {
+			$js .=  "MBG.addProductClick(".json_encode($product).");";
 		}
 		return $js;
 	}
@@ -594,24 +600,15 @@ class Googleanalytics extends Module
 	/**
 	* add product checkout info
 	*/
-	public function addCheckout($step)
+
+	public function addProductFromCheckout($products, $step)
 	{
 		$js = '';
-		$js .=  "MBG.addCheckout('".$step."'');";
-		return $js;
-	}
-
-
-	public function addProductFromCheckout($products)
-	{
-		$js = '';
-		//addCheckout
 		if(!is_array($products))
 			return;
 		foreach($products as $product) {
 			$js .=  "MBG.add(".json_encode($product).");";
 		}
-		$js .=  "MBG.addCheckout();";
 		return $js;
 	}
 
@@ -628,7 +625,8 @@ class Googleanalytics extends Module
 			$id_product = (int)Tools::getValue('id_product');
 			$ga_product = $this->wrapProduct($id_product, null);
 			$js .= "MBG.addProductDetailView(".json_encode($ga_product).");";
-			$js .= $this->addProductImpressionAndClicks(array($ga_product));
+			$js .= $this->addProductImpression(array($ga_product));
+			$js .= $this->addProductClicks(array($ga_product));
 			return $this->runJS($js);
 		}
 
@@ -659,7 +657,7 @@ class Googleanalytics extends Module
 			<script>
 
 				jQuery(document).ready(function(){
-					var ga_prestashop_developerid='xxxxx';
+					var ga_prestashop_developerid='';
 					(window.gaDevIDs=window.gaDevIds||[]).push(ga_prestashop_developerid);
 					var MBG = GoogleAnalyticEnhancedECommerce;
 					MBG.setCurrency('$currency');
