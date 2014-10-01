@@ -60,8 +60,6 @@ class Googleanalytics extends Module
 		if (Shop::isFeatureActive())
 		Shop::setContext(Shop::CONTEXT_ALL);
 
-		unlink(_PS_OVERRIDE_DIR_.'class/Link.php');
-
 		if (!parent::install() ||
 			!$this->registerHook('header') ||
 			!$this->registerHook('adminOrder') ||
@@ -351,11 +349,6 @@ class Googleanalytics extends Module
 		// return category page product list
 		// get variables assigned by smarty
 		$ga_scripts = '';
-
-		if ($controller_name == 'category' || $controller_name == 'search')
-		{
-
-		}
 
 		// hook add remove from cart start
 		$cart_products = $this->wrapProducts($this->context->cart->getProducts());
