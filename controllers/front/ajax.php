@@ -35,7 +35,7 @@ class GoogleanalyticsAjaxModuleFrontController extends ModuleFrontController
 	public function initContent()
 	{
 		parent::initContent();
-		Db::getInstance()->execute('update `'._DB_PREFIX_.'googleanalytics` set sent=1,date_added=now() where id_order='.(int)Tools::getValue('orderid'));
+		Db::getInstance()->execute('update `'._DB_PREFIX_.'googleanalytics` set sent=1,date_add=now() where id_order='.(int)Tools::getValue('orderid'));
 		die;
 	}
 }
