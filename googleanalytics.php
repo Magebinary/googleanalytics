@@ -104,9 +104,6 @@ class Googleanalytics extends Module
 		if (!parent::uninstall())
 		return false;
 
-		//delete override class
-		unlink(_PS_OVERRIDE_DIR_.'class/Link.php');
-
 		//drop transaction table
 		Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'googleanalytics`');
 
