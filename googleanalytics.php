@@ -615,15 +615,18 @@ class Googleanalytics extends Module
 	public function hookDisplayFooterProduct()
 	{
 		$controller_name = Tools::getValue('controller');
-		if ($controller_name == 'product' && strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])>0)
+		if ($controller_name == 'product')
 		{
 			//add product view
 			$js = '';
 			$id_product = (int)Tools::getValue('id_product');
 			$ga_product = $this->wrapProduct($id_product, null);
 			$js .= "MBG.addProductDetailView(".json_encode($ga_product).");";
-			$js .= $this->addProductImpression(array($ga_product));
-			$js .= $this->addProductClicks(array($ga_product));
+			if (strpos(isset($_SERVER['HTTP_REFERER']), $_SERVER['HTTP_HOST'])>0)
+			{
+				$js .= $this->addProductClicks(array($ga_product));
+			}
+			
 			return $this->runJS($js);
 		}
 
