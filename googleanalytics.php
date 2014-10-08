@@ -36,7 +36,7 @@ class Googleanalytics extends Module
 	{
 		$this->name = 'googleanalytics';
 		$this->tab = 'analytics_stats';
-		$this->version = '0.9(beta)';
+		$this->version = '0.9.2';
 		$this->author = 'MageBinary';
 		$this->need_instance = 1;
 		$this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
