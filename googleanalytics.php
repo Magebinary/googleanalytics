@@ -335,15 +335,12 @@ class Googleanalytics extends Module
 	{
 		$controller_name = Tools::getValue('controller');
 
-		$products = $this->context->smarty->getTemplateVars('products');
+		$products_callback = $products = $this->context->smarty->getTemplateVars('products');
+	
+		$products = $this->wrapProducts($products);
+		
 
-		if (!is_array($products)) {
-			$products = $this->wrapProducts($products);
-		}
 
-
-		// return category page product list
-		// get variables assigned by smarty
 		$ga_scripts = '';
 
 		// hook add remove from cart start
@@ -449,6 +446,7 @@ class Googleanalytics extends Module
 		{
 			$result_products[] = $this->wrapProduct($product,$extras,$index);
 		}
+
 		return $result_products;
 	}
 
@@ -516,9 +514,14 @@ class Googleanalytics extends Module
 			if(isset($product['link']))
 			{
 				$product_link =  $product['link'] ? :'';
-				$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
-				$product->link = $product_link;
 			}
+
+			if(isset($product->link)) 
+			{
+				 $product->link = $product_link;
+			}
+			
+			$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
 		}
 		//else {
 			//return null;
@@ -580,8 +583,9 @@ class Googleanalytics extends Module
 	{
 		$js = '';
 		foreach($products as $product) {
-			$js .=  "MBG.addProductImpression(".json_encode($product).");";
+			$js .=  "MBG.add(".json_encode($product).",'','true');";
 		}
+		$js .=  "MBG.addProductImpression();";
 		return $js;
 	}
 
@@ -652,6 +656,11 @@ class Googleanalytics extends Module
 	*/
 	public function runJS($jscode)
 	{
+		//var_dump(debug_backtrace());
+		if (empty($jscode)) 
+		{
+			return;
+		}
 		$currency = $this->context->currency->iso_code;
 		$js = "
 			<script>

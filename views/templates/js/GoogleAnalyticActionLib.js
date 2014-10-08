@@ -85,8 +85,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
     addProductImpression: function(Product) {
-        //console.log(Product);
-        this.add(Product,'',true);
+        
         ga('send', 'pageview');
 
     },
