@@ -182,7 +182,7 @@ class Googleanalytics extends Module
 				//add google analytics
 				array(
 					'type' => 'text',
-					'label' => $this->l('Business Account ID'),
+					'label' => $this->l('Google Analytics Tracking ID'),
 					'name' => 'GA_ACCOUNT_ID',
 					'size' => 20,
 					'required' => true,
