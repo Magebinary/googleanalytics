@@ -336,9 +336,9 @@ class Googleanalytics extends Module
 		$controller_name = Tools::getValue('controller');
 
 		$products_callback = $products = $this->context->smarty->getTemplateVars('products');
-	
+
 		$products = $this->wrapProducts($products);
-		
+
 
 
 		$ga_scripts = '';
@@ -516,11 +516,11 @@ class Googleanalytics extends Module
 				$product_link =  $product['link'] ? :'';
 			}
 
-			if(isset($product->link)) 
+			if(isset($product->link))
 			{
 				 $product->link = $product_link;
 			}
-			
+
 			$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
 		}
 		//else {
@@ -630,7 +630,7 @@ class Googleanalytics extends Module
 			{
 				$js .= $this->addProductClicks(array($ga_product));
 			}
-			
+
 			return $this->runJS($js);
 		}
 
@@ -657,7 +657,7 @@ class Googleanalytics extends Module
 	public function runJS($jscode)
 	{
 		//var_dump(debug_backtrace());
-		if (empty($jscode)) 
+		if (empty($jscode))
 		{
 			return;
 		}
@@ -673,6 +673,7 @@ class Googleanalytics extends Module
 					".
 					$jscode
 					."
+					ga('send', 'pageview');
 				});
 
 			</script>

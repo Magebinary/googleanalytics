@@ -61,7 +61,7 @@ var GoogleAnalyticEnhancedECommerce = {
     addProductDetailView: function(Product) {
         this.add(Product);
         ga('ec:setAction', 'detail');
-        ga('send', 'pageview');
+        //ga('send', 'pageview');
     },
 
     addToCart: function(Product) {
@@ -85,8 +85,8 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
     addProductImpression: function(Product) {
-        
-        ga('send', 'pageview');
+
+        //ga('send', 'pageview');
 
     },
 
@@ -117,7 +117,7 @@ var GoogleAnalyticEnhancedECommerce = {
         ga('ec:setAction', 'refund', {
             'id': Order.Id, // Transaction ID is required for partial refund.
         });
-        ga('send', 'pageview');
+        //ga('send', 'pageview');
 
 
     },
@@ -155,7 +155,7 @@ var GoogleAnalyticEnhancedECommerce = {
             'step': Step
             //'option':'Visa'
         });
-        ga('send', 'pageview');
+        //ga('send', 'pageview');
 
 
     }
