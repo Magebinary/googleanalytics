@@ -636,11 +636,13 @@ class Googleanalytics extends Module
 			$id_product = (int)Tools::getValue('id_product');
 			$ga_product = $this->wrapProduct($id_product, null);
 			$js .= "MBG.addProductDetailView(".json_encode($ga_product).");";
-			if (strpos(isset($_SERVER['HTTP_REFERER']), $_SERVER['HTTP_HOST'])>0)
-			{
-				$js .= $this->addProductClicks(array($ga_product));
-			}
-
+				if (isset($_SERVER['HTTP_REFERER']))
+				{
+					if (strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'])>0)
+					{
+						$js .= $this->addProductClicks(array($ga_product));
+					}
+				}
 			return $this->runJS($js);
 		}
 
