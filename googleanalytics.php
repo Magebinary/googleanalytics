@@ -333,6 +333,7 @@ class Googleanalytics extends Module
 
 	public function hookDisplayFooter()
 	{
+		//ProductSale::getBestSalesLight((int)$params['cookie']->id_lang, 0, 8)
 		$controller_name = Tools::getValue('controller');
 
 		$products_callback = $products = $this->context->smarty->getTemplateVars('products');
@@ -376,10 +377,13 @@ class Googleanalytics extends Module
 		{
 			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));
 		}
-		if ($controller_name == 'category' || $controller_name == 'search')
-		{
+		//if ($controller_name == 'category' || $controller_name == 'search')
+		//{
+		if(count($products) > 0) {
 			$ga_scripts .= $this->addProductImpression($products);
 		}
+
+		//}
 
 		return $this->runJS($ga_scripts);
 	}
@@ -663,10 +667,10 @@ class Googleanalytics extends Module
 	public function runJS($jscode)
 	{
 		//var_dump(debug_backtrace());
-		if (empty($jscode))
-		{
-			return;
-		}
+		//if (empty($jscode))
+		//{
+		//	return;
+		//}
 		$currency = $this->context->currency->iso_code;
 		$js = "
 			<script>
