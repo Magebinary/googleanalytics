@@ -17,7 +17,7 @@ var GoogleAnalyticEnhancedECommerce = {
             for (var key in Product) {
                 for (i = 0; i < ProductFieldObject.length; i++) {
                     if (key.toLowerCase() == ProductFieldObject[i]) {
-                        if(Product[key] != null) {
+                        if (Product[key] != null) {
                             Products[key.toLowerCase()] = Product[key];
                         }
 
@@ -94,7 +94,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
     refundByOrderId: function(Order) {
 
-    /**
+        /**
     Refund an entire transaction.
     **/
 
@@ -106,7 +106,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
     refundByProduct: function(Order) {
 
-    /**
+        /**
      Refund a single product.
     **/
         //this.add(Product);
@@ -121,6 +121,30 @@ var GoogleAnalyticEnhancedECommerce = {
 
     addProductClick: function(Product) {
 
+        var QuickView = jQuery('a[href$="'+Product.url+'"].quick-view');
+        //console.log(QuickView);
+        //if (QuickView ==! undefined) {
+            QuickView.on("click", function(event) {
+                GoogleAnalyticEnhancedECommerce.add(Product);
+                ga('ec:setAction', 'click', {
+                    list: Product.list
+                });
+
+                ga('send', 'event', 'Product Click', 'click', Product.list, {
+                    'hitCallback': function() {
+                        return !ga.loaded;
+                    }
+                });
+
+            });
+
+        //}
+
+
+    },
+
+    addProductClickByHttpReferal: function(Product) {
+
         this.add(Product);
         ga('ec:setAction', 'click', {
             list: Product.list
@@ -132,7 +156,7 @@ var GoogleAnalyticEnhancedECommerce = {
             }
         });
 
-   },
+    },
 
     addTransaction: function(Order) {
 
@@ -140,7 +164,9 @@ var GoogleAnalyticEnhancedECommerce = {
         ga('ec:setAction', 'purchase', Order);
         ga('send', 'pageview', {
             'hitCallback': function() {
-                $.get( Order.url,  { orderid:  Order.id  });
+                $.get(Order.url, {
+                    orderid: Order.id
+                });
             }
         });
 
@@ -148,7 +174,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
     addCheckout: function(Step) {
 
-        ga('ec:setAction','checkout',{
+        ga('ec:setAction', 'checkout', {
             'step': Step
             //'option':'Visa'
         });
