@@ -45,6 +45,7 @@ var GoogleAnalyticEnhancedECommerce = {
 
 
         if (Impression == true) {
+
             ga('ec:addImpression', Products);
         } else {
             ga('ec:addProduct', Products);

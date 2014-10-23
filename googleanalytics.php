@@ -568,6 +568,8 @@ class Googleanalytics extends Module
 	public function addTransaction($products,$order)
 	{
 		$js = '';
+		if(!is_array($products))
+			return;
 		foreach($products as $product)
 		{
 			$js .= 'MBG.add('.json_encode($product).');';
@@ -582,8 +584,10 @@ class Googleanalytics extends Module
 	public function addProductImpression($products)
 	{
 		$js = '';
+		if(!is_array($products))
+			return;
 		foreach($products as $product) {
-			$js .=  "MBG.add(".json_encode($product).",'','true');";
+			$js .=  "MBG.add(".json_encode($product).",'',true);";
 		}
 		$js .=  "MBG.addProductImpression();";
 		return $js;
@@ -592,6 +596,8 @@ class Googleanalytics extends Module
 	public function addProductClicks($products)
 	{
 		$js = '';
+		if(!is_array($products))
+			return;
 		foreach($products as $product) {
 			$js .=  "MBG.addProductClick(".json_encode($product).");";
 		}
