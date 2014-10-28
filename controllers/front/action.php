@@ -34,8 +34,10 @@ class GoogleanalyticsActionModuleFrontController extends ModuleFrontController
 	 */
 	public function initContent()
 	{
-		parent::initContent();
-		echo $this->context->cookie->__get('ga_add_cart');
-		die;
+		if(Configuration::get('googleanalytics_enable'))
+		{
+			parent::initContent();
+			die($this->context->cookie->__get('ga_add_cart'));
+		}
 	}
 }

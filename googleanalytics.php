@@ -29,7 +29,7 @@ if (!defined('_PS_VERSION_'))
 
 class Googleanalytics extends Module
 {
-	protected $_JsState = '0';
+	protected $_js_state = 0;
 
 	/**
 	* initiate Google Analytics module
@@ -40,7 +40,6 @@ class Googleanalytics extends Module
 		$this->tab = 'analytics_stats';
 		$this->version = '0.9.2';
 		$this->author = 'MageBinary';
-		$this->need_instance = 1;
 		$this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
 		$this->bootstrap = true;
 
@@ -49,18 +48,18 @@ class Googleanalytics extends Module
 		$this->displayName = $this->l('Google Analytics');
 		$this->description = $this->l('This is the GoogleAnalytics extension for Prestashop, using enhanced e-commerce Google Analytics API');
 
-		$this->confirmUninstall = $this->l('Are you sure you want to uninstall GoogleAnalytics?');
+		$this->confirmUninstall = $this->l('Are you sure you want to uninstall Google Analytics? You will lose all the data related to this module.');
 
 	}
 
 	/**
-	* install module *
+	* Module's installation 
 	* @return bool
 	*/
 	public function install()
 	{
 		if (Shop::isFeatureActive())
-		Shop::setContext(Shop::CONTEXT_ALL);
+			Shop::setContext(Shop::CONTEXT_ALL);
 
 		if (!parent::install() ||
 			!$this->registerHook('header') ||
@@ -82,34 +81,28 @@ class Googleanalytics extends Module
 		Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'googleanalytics`');
 		//create transaction table
 		$query = 'CREATE TABLE `'._DB_PREFIX_.'googleanalytics` (
-		`id_google_analytics` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-		`id_order` INT NOT NULL ,
-		`sent` Boolean,
-		`date_add` DateTime
-		)';
+			`id_google_analytics` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+			`id_order` INT NOT NULL ,
+			`sent` Boolean,
+			`date_add` DateTime
+			)';
 
 		if (!Db::getInstance()->Execute($query))
-		{
-			$this->uninstall();
-			return false;
-		}
+			return $this->uninstall();
 
 		return true;
 	}
 
 	/**
-	* uninstall module
+	* Module's uninstall
 	* @return bool
 	*/
 	public function uninstall()
 	{
 		if (!parent::uninstall())
-		return false;
-
+			return false;
 		//drop transaction table
-		Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'googleanalytics`');
-
-		return true;
+		return Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'googleanalytics`');
 	}
 
 
@@ -202,7 +195,6 @@ class Googleanalytics extends Module
 		$helper->fields_value['GA_ACCOUNT_ID'] = Configuration::get('GA_ACCOUNT_ID');
 
 		return $helper->generateForm($fields_form);
-
 	}
 
 	/**
@@ -213,14 +205,14 @@ class Googleanalytics extends Module
 		$output = '';
 		if (Tools::isSubmit('submit'.$this->name))
 		{
-			$error = false;
+			$error = true;
 			$googleanalytics_enable = Tools::getValue('googleanalytics_enable');
-			$GA_ACCOUNT_ID = Tools::getValue('GA_ACCOUNT_ID');
+			$ga_account_id = Tools::getValue('GA_ACCOUNT_ID');
 
-			if (!$error)
+			if ($error == true)
 			{
 				Configuration::updateValue('googleanalytics_enable', $googleanalytics_enable);
-				Configuration::updateValue('GA_ACCOUNT_ID', $GA_ACCOUNT_ID);
+				Configuration::updateValue('GA_ACCOUNT_ID', $ga_account_id);
 				$output .= $this->displayConfirmation($this->l('Settings updated'));
 			}
 		}
@@ -233,21 +225,15 @@ class Googleanalytics extends Module
 	*/
 	public function hookDisplayHeader()
 	{
-		//verified
-		//echo "<br><font color=red size=30px>google analytics hook display header</font><br>";
-
 		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('GA_ACCOUNT_ID') != '')
 		{
-
 			$this->context->smarty->assign(
 				array(
 					'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
 				)
 			);
-
 			return $this->display(__FILE__, 'hookDisplayHeader.tpl');
 		}
-
 	}
 
 
@@ -701,7 +687,7 @@ class Googleanalytics extends Module
 	public function runJS($jscode)
 	{
 		//var_dump(debug_backtrace());
-		if ($this->_JsState != 1)
+		if ($this->_js_state != 1)
 		{
 			$jscode .= 'ga("send", "pageview");';
 		}
@@ -722,7 +708,7 @@ class Googleanalytics extends Module
 			</script>
 		";
 
-		$this->_JsState = 1;
+		$this->_js_state = 1;
 
 		return $js;
 	}
