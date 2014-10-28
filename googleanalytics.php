@@ -240,14 +240,14 @@ class Googleanalytics extends Module
 	/**
 	* return a detailed transaction for google analytics
 	*/
-	public function wrapOrder($orderid)
+	public function wrapOrder($id_order)
 	{
-		$order = new Order((int)$orderid);
+		$order = new Order((int)$id_order);
 
-		if(isset($order))
+		if (isset($order))
 		{
 			$transaction = array(
-				'orderid' => $orderid,
+				'orderid' => $id_order,
 				'storename' => $this->context->shop->name,
 				'grandtotal' => $order->total_paid,
 				'shipping' => $order->total_shipping,
@@ -256,12 +256,8 @@ class Googleanalytics extends Module
 			);
 			return $transaction;
 		}
-		else
-		{
-			return null;
-		}
 
-
+		return null;
 	}
 
 
@@ -279,8 +275,8 @@ class Googleanalytics extends Module
 		if ($controller_name == 'orderconfirmation')
 		{
 			//ORDERID OR ORDER REFERNCE?
-			$orderid = $this->context->controller->id_order;
-			$order = new Order($orderid);
+			$id_order = $this->context->controller->id_order;
+			$order = new Order($id_order);
 			$order_products = array();
 
 			foreach($order->getProducts() as $order_product)
@@ -288,18 +284,17 @@ class Googleanalytics extends Module
 				$order_products[] = $this->wrapProduct((int)$order_product['product_id'],array('qty'=>$order_product['product_quantity']));
 			}
 
-			$ga_order_record = Db::getInstance()->getRow('select sent from  `'._DB_PREFIX_.'googleanalytics` where id_order = '.(int)$orderid);
+			$ga_order_record = Db::getInstance()->getRow('SELECT sent FROM  `'._DB_PREFIX_.'googleanalytics` WHERE id_order = '.(int)$id_order);
 
 			if ($ga_order_record == null)
 			{
-				Db::getInstance()->execute('insert into  `'._DB_PREFIX_.'googleanalytics` (id_order, sent, date_add) values ('.$orderid.',false,'.time().') ');
-				$ga_order_record = Db::getInstance()->getRow('select sent from  `'._DB_PREFIX_.'googleanalytics` where id_order = '.(int)$orderid);
+				Db::getInstance()->execute('INSERT INTO  `'._DB_PREFIX_.'googleanalytics` (id_order, sent, date_add) VALUES ('.$id_order.',false,'.time().') ');
+				$ga_order_record = Db::getInstance()->getRow('SELECT sent FROM  `'._DB_PREFIX_.'googleanalytics` WHERE id_order = '.(int)$id_order);
 			}
 
 			if ($ga_order_record['sent'] != true)
 			{
 				$transaction = array(
-						//'id' => $orderid,
 						'id' => $order->reference,
 						'affiliation' => $this->context->shop->name,
 						'revenue' => $order->total_paid,
@@ -307,10 +302,8 @@ class Googleanalytics extends Module
 						'tax' => $order->total_paid_tax_incl - $order->total_paid_tax_excl,
 						'url' => $this->context->link->getModuleLink('googleanalytics','ajax'),
 				);
-			$ga_scripts = $this->addTransaction($order_products, $transaction);
-
-			return $this->runJS($ga_scripts);
-
+				$ga_scripts = $this->addTransaction($order_products, $transaction);
+				return $this->runJS($ga_scripts);
 			}
 		}
 	}
@@ -324,13 +317,7 @@ class Googleanalytics extends Module
 		//ProductSale::getBestSalesLight((int)$params['cookie']->id_lang, 0, 8)
 		$controller_name = Tools::getValue('controller');
 
-		$products_callback = $products = $this->context->smarty->getTemplateVars('products');
-
-		$products = $this->wrapProducts($products);
-
-
-
-		$ga_scripts = '';
+		$products = $this->wrapProducts($this->context->smarty->getTemplateVars('products'));
 
 		// hook add remove from cart start
 		$cart_products = $this->wrapProducts($this->context->cart->getProducts());
@@ -343,7 +330,7 @@ class Googleanalytics extends Module
 
 
 		$cart_actions = $this->context->cookie->__get('ga_cart');
-		if(isset($cart_actions))
+		if (isset($cart_actions))
 		{
 			$ga_scripts.=$cart_actions;
 			$this->context->cookie->__unset('ga_cart');
@@ -352,7 +339,7 @@ class Googleanalytics extends Module
 		if ($controller_name == 'order' )
 		{
 			$step = Tools::getValue('step');
-			if(empty($step))
+			if (empty($step))
 			{
 				$step = 0;
 			}
@@ -366,14 +353,12 @@ class Googleanalytics extends Module
 			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));
 		}
 
-		if(count($products) > 0) {
+		if (count($products) > 0) {
 			$ga_scripts .= $this->addProductImpression($products);
 			$ga_scripts .= $this->addProductClick($products);
 		}
 
-		//if ($this->canShowJs()) {
-				return $this->runJS($ga_scripts);
-		//}
+		return $this->runJS($ga_scripts);
 
 	}
 
@@ -452,7 +437,7 @@ class Googleanalytics extends Module
 	{
 
 		$result_products = array();
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $index => $product)
 		{
@@ -470,22 +455,22 @@ class Googleanalytics extends Module
 		$cache_id = '';
 		$ga_product = '';
 
-		if(isset($product->id)) {
+		if (isset($product->id)) {
 			$cache_id = $product->id;
 		}
-		elseif(isset($product['product_id'])) {
+		elseif (isset($product['product_id'])) {
 			$cache_id = $product['product_id'];
 		}
-		elseif(isset($product['id_product'])) {
+		elseif (isset($product['id_product'])) {
 			$cache_id = $product['id_product'];
 		}
-		elseif(is_int($product)) {
+		elseif (is_int($product)) {
 			$cache_id  = $product;
 		}
 
 		$cache_id = 'GoogleAnalytics_product_'.$cache_id;
 
-		if(Cache::isStored($cache_id)) {
+		if (Cache::isStored($cache_id)) {
 			$ga_product = Cache::retrieve($cache_id);
 			return $ga_product;
 		}
@@ -494,43 +479,43 @@ class Googleanalytics extends Module
 		$product_qty = 1;
 		$variant = null;
 
-		if(isset($product['attributes_small'])) {
+		if (isset($product['attributes_small'])) {
 			$variant = $product['attributes_small'];
 		}
-		if(isset($extras['attributes_small'])) {
+		if (isset($extras['attributes_small'])) {
 			$variant = $extras['attributes_small'];
 		}
 		/** Product Qty ***/
-	    if(isset($extras['qty'])) {
+	    if (isset($extras['qty'])) {
 			$product_qty = $extras['qty'];
 		}
 
-		elseif(isset($product['cart_quantity'])) {
+		elseif (isset($product['cart_quantity'])) {
 			$product_qty = $product['cart_quantity'];
 		}
 
-		if(isset($product->id)) {
+		if (isset($product->id)) {
 			$product = new Product($product->id, true, $this->context->language->id, $this->context->shop->id);
 		}
-		elseif(is_int($product)) {
+		elseif (is_int($product)) {
 			$product = new Product($product, true, $this->context->language->id, $this->context->shop->id);
 		}elseif (isset($product['product_id']) && is_int($product['product_id'])) {
 			$product = new Product($product['product_id'], true, $this->context->language->id, $this->context->shop->id);
-			if($product['product_quantity'])
+			if ($product['product_quantity'])
 			{
 				$product_qty = $product['product_quantity'];
 			}
 		}
-		elseif(!empty($product["id_product"])) {
+		elseif (!empty($product["id_product"])) {
 			/** Product Link ***/
-			if(isset($product['link']))
+			if (isset($product['link']))
 			{
 				$product_link =  $product['link'] ? :'';
 			}
 
 			$product = new Product($product["id_product"], true, $this->context->language->id, $this->context->shop->id);
 
-			if(isset($product->link))
+			if (isset($product->link))
 			{
 				 $product_link = $product->link;
 			}
@@ -540,7 +525,7 @@ class Googleanalytics extends Module
 		if (Validate::isLoadedObject($product))
 		{
 			$category = new Category($product->id_category_default);
-			$manufactory = Manufacturer::getNameById((int)$product->id_manufacturer);
+			$manufacturer = Manufacturer::getNameById((int)$product->id_manufacturer);
 
 			$producttype = 'typical';
 			if (isset($product->pack) && $product->pack == 1)
@@ -552,7 +537,7 @@ class Googleanalytics extends Module
 				'id'=>$product->reference,
 				'name'=>Product::getProductName($product->id),
 				'category'=>$category->getName(),
-				'brand'=>$manufactory,
+				'brand'=>$manufacturer,
 				'variant'=>$variant,
 				'type'=>$producttype,
 				'position'=>$position,
@@ -576,7 +561,7 @@ class Googleanalytics extends Module
 	public function addTransaction($products,$order)
 	{
 		$js = '';
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $product)
 		{
@@ -592,7 +577,7 @@ class Googleanalytics extends Module
 	public function addProductImpression($products)
 	{
 		$js = '';
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $product) {
 			$js .=  "MBG.add(".json_encode($product).",'',true);";
@@ -604,7 +589,7 @@ class Googleanalytics extends Module
 	public function addProductClick($products)
 	{
 		$js = '';
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $product) {
 			$js .=  "MBG.addProductClick(".json_encode($product).");";
@@ -615,7 +600,7 @@ class Googleanalytics extends Module
 	public function addProductClickByHttpReferal($products)
 	{
 		$js = '';
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $product) {
 			$js .=  "MBG.addProductClickByHttpReferal(".json_encode($product).");";
@@ -631,7 +616,7 @@ class Googleanalytics extends Module
 	public function addProductFromCheckout($products, $step)
 	{
 		$js = '';
-		if(!is_array($products))
+		if (!is_array($products))
 			return;
 		foreach($products as $product) {
 			$js .=  "MBG.add(".json_encode($product).");";
@@ -736,9 +721,7 @@ class Googleanalytics extends Module
 		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('GA_ACCOUNT_ID') != '')
 		{
 			$this->context->smarty->assign(
-				array(
-					'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
-				)
+				'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
 			);
 
 			$ga_scripts = '';
@@ -747,7 +730,7 @@ class Googleanalytics extends Module
 			foreach($ga_order_records as $row)
 			{
 				$transaction = $this->wrapOrder($row['id_order']);
-				if(isset($transaction))
+				if (isset($transaction))
 				{
 					$transaction = json_encode($transaction);
 					$ga_scripts .= 'MBG.addTransaction('.$transaction.');';
@@ -770,7 +753,6 @@ class Googleanalytics extends Module
 			'id' => $params['order']->reference,
 		);
 
-		//TODO Convert below to Refund Function.
 		$ga_scripts = '';
 		foreach($qty_refunded as $orderdetail_id=>$qty)
 		{
@@ -795,7 +777,7 @@ class Googleanalytics extends Module
 	 */
 	public function hookActionCartSave()
 	{
-		if(!isset($this->context->cart))
+		if (!isset($this->context->cart))
 			return;
 
 		$Cart = array(
@@ -810,11 +792,11 @@ class Googleanalytics extends Module
 
 		}
 
-		if(isset($Cart_Products))
+		if (isset($Cart_Products))
 		{
 			foreach ($Cart_Products as $cart_product)
 			{
-				if($cart_product['id_product'] == Tools::getValue('id_product'))
+				if ($cart_product['id_product'] == Tools::getValue('id_product'))
 				{
 					$Cart['attributes_small'] = $cart_product['attributes_small'];
 				}
@@ -827,11 +809,11 @@ class Googleanalytics extends Module
 
 		$ga_scripts  = '';
 
-		if($Cart['addAction'] == 'add' || $Cart['extraAction'] == 'up') {
+		if ($Cart['addAction'] == 'add' || $Cart['extraAction'] == 'up') {
 			$ga_scripts .= "MBG.addToCart(".json_encode($ga_products).");";
 		}
 
-		if($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down') {
+		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down') {
 			$ga_scripts .= "MBG.removeFromCart(".json_encode($ga_products).");";
 		}
 
