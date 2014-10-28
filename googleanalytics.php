@@ -295,7 +295,7 @@ class Googleanalytics extends Module
 			if ($ga_order_record['sent'] != true)
 			{
 				$transaction = array(
-						'id' => $order->reference,
+						'orderid' => $order->reference,
 						'affiliation' => $this->context->shop->name,
 						'revenue' => $order->total_paid,
 						'shipping' => $order->total_shipping,
@@ -314,6 +314,7 @@ class Googleanalytics extends Module
 
 	public function hookDisplayFooter()
 	{
+		$ga_scripts = '';
 		//ProductSale::getBestSalesLight((int)$params['cookie']->id_lang, 0, 8)
 		$controller_name = Tools::getValue('controller');
 
@@ -720,9 +721,7 @@ class Googleanalytics extends Module
 
 		if (Configuration::get('googleanalytics_enable') != '' && Configuration::get('GA_ACCOUNT_ID') != '')
 		{
-			$this->context->smarty->assign(
-				'GA_ACCOUNT_ID' => Configuration::get('GA_ACCOUNT_ID'),
-			);
+			$this->context->smarty->assign('GA_ACCOUNT_ID', Configuration::get('GA_ACCOUNT_ID'));
 
 			$ga_scripts = '';
 			$ga_order_records = Db::getInstance()->ExecuteS('select * from  `'._DB_PREFIX_.'googleanalytics` where sent=0');

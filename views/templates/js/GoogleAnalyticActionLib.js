@@ -165,7 +165,7 @@ var GoogleAnalyticEnhancedECommerce = {
         ga('send', 'pageview', {
             'hitCallback': function() {
                 $.get(Order.url, {
-                    orderid: Order.id
+                    orderid: Order.orderid
                 });
             }
         });
