@@ -147,6 +147,7 @@ class Googleanalytics extends Module
 			)
 		);
 
+		$fields_form = array();
 		// Init Fields form array
 		$fields_form[0]['form'] = array(
 			'legend' => array(
@@ -369,10 +370,8 @@ class Googleanalytics extends Module
 		$controller_name = Tools::getValue('controller');
 		$ban = false;
 		foreach ($bannedControllers as $_controller) {
-			if ($controller_name = $ban) {
-
+			if ($controller_name == $_controller) {
 				$ban = true;
-
 			}
 		}
 		return $ban;
@@ -385,9 +384,7 @@ class Googleanalytics extends Module
 	public function hookDisplayHome()
 	{
 		$ga_scripts = '';
-		//verified
-		$controller_name = Tools::getValue('controller');
-
+	
 		//add home featured products
 		if (!isset(HomeFeatured::$cache_products))
 		{
@@ -566,9 +563,9 @@ class Googleanalytics extends Module
 			return;
 		foreach($products as $product)
 		{
-			$js .= 'MBG.add('.json_encode($product).');';
+			$js .= 'MBG.add('.Tools::jsonEncode($product).');';
 		}
-		$js .= 'MBG.addTransaction('.json_encode($order).');';
+		$js .= 'MBG.addTransaction('.Tools::jsonEncode($order).');';
 		return $js;
 	}
 
@@ -581,7 +578,7 @@ class Googleanalytics extends Module
 		if (!is_array($products))
 			return;
 		foreach($products as $product) {
-			$js .=  "MBG.add(".json_encode($product).",'',true);";
+			$js .=  "MBG.add(".Tools::jsonEncode($product).",'',true);";
 		}
 		//$js .=  "MBG.addProductImpression();";
 		return $js;
@@ -593,7 +590,7 @@ class Googleanalytics extends Module
 		if (!is_array($products))
 			return;
 		foreach($products as $product) {
-			$js .=  "MBG.addProductClick(".json_encode($product).");";
+			$js .=  "MBG.addProductClick(".Tools::jsonEncode($product).");";
 		}
 		return $js;
 	}
@@ -604,7 +601,7 @@ class Googleanalytics extends Module
 		if (!is_array($products))
 			return;
 		foreach($products as $product) {
-			$js .=  "MBG.addProductClickByHttpReferal(".json_encode($product).");";
+			$js .=  "MBG.addProductClickByHttpReferal(".Tools::jsonEncode($product).");";
 		}
 		return $js;
 	}
@@ -614,13 +611,13 @@ class Googleanalytics extends Module
 	* add product checkout info
 	*/
 
-	public function addProductFromCheckout($products, $step)
+	public function addProductFromCheckout($products)
 	{
 		$js = '';
 		if (!is_array($products))
 			return;
 		foreach($products as $product) {
-			$js .=  "MBG.add(".json_encode($product).");";
+			$js .=  "MBG.add(".Tools::jsonEncode($product).");";
 		}
 		return $js;
 	}
@@ -637,7 +634,7 @@ class Googleanalytics extends Module
 			$js = '';
 			$id_product = (int)Tools::getValue('id_product');
 			$ga_product = $this->wrapProduct($id_product, null);
-			$js .= "MBG.addProductDetailView(".json_encode($ga_product).");";
+			$js .= "MBG.addProductDetailView(".Tools::jsonEncode($ga_product).");";
 
 				if (isset($_SERVER['HTTP_REFERER']))
 				{
@@ -731,7 +728,7 @@ class Googleanalytics extends Module
 				$transaction = $this->wrapOrder($row['id_order']);
 				if (isset($transaction))
 				{
-					$transaction = json_encode($transaction);
+					$transaction = Tools::jsonEncode($transaction);
 					$ga_scripts .= 'MBG.addTransaction('.$transaction.');';
 				}
 			}
@@ -763,9 +760,9 @@ class Googleanalytics extends Module
 				'quantity' => $qty,
 			);
 			//display ga refund product
-			$ga_scripts .= "MBG.add(".json_encode($Product).");";
+			$ga_scripts .= "MBG.add(".Tools::jsonEncode($Product).");";
 		}
-			$ga_scripts .= "MBG.refundByProduct(".json_encode($Order).");";
+			$ga_scripts .= "MBG.refundByProduct(".Tools::jsonEncode($Order).");";
 
 		$this->context->cookie->__set('ga_admin_refund', $ga_scripts);
 	}
@@ -809,11 +806,11 @@ class Googleanalytics extends Module
 		$ga_scripts  = '';
 
 		if ($Cart['addAction'] == 'add' || $Cart['extraAction'] == 'up') {
-			$ga_scripts .= "MBG.addToCart(".json_encode($ga_products).");";
+			$ga_scripts .= "MBG.addToCart(".Tools::jsonEncode($ga_products).");";
 		}
 
 		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down') {
-			$ga_scripts .= "MBG.removeFromCart(".json_encode($ga_products).");";
+			$ga_scripts .= "MBG.removeFromCart(".Tools::jsonEncode($ga_products).");";
 		}
 
 		$this->context->cookie->__set('ga_cart', $this->context->cookie->__get('ga_cart').$ga_scripts);
