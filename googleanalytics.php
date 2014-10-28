@@ -669,8 +669,7 @@ class Googleanalytics extends Module
 	*/
 	public function runJS($jscode)
 	{
-		//var_dump(debug_backtrace());
-		if ($this->_js_state != 1)
+		if ($this->_js_state != 1 && $this->context->controller->controller_type!='admin')
 		{
 			$jscode .= 'ga("send", "pageview");';
 		}
