@@ -744,7 +744,7 @@ class Googleanalytics extends Module
 	{
 		$qty_refunded = Tools::getValue('cancelQuantity');
 
-		$Order = array(
+		$order = array(
 			'id' => $params['order']->reference,
 		);
 
@@ -753,15 +753,15 @@ class Googleanalytics extends Module
 		{
 			$orderdetail = new OrderDetail($orderdetail_id);
 
-			$Product = array(
+			$product = array(
 				//'id' => $orderdetail->product_id,
 				'id' => $orderdetail->product_reference,
 				'quantity' => $qty,
 			);
 			//display ga refund product
-			$ga_scripts .= 'MBG.add('.Tools::jsonEncode($Product).');';
+			$ga_scripts .= 'MBG.add('.Tools::jsonEncode($product).');';
 		}
-			$ga_scripts .= 'MBG.refundByProduct('.Tools::jsonEncode($Order).');';
+			$ga_scripts .= 'MBG.refundByProduct('.Tools::jsonEncode($order).');';
 
 		$this->context->cookie->__set('ga_admin_refund', $ga_scripts);
 	}
@@ -770,13 +770,13 @@ class Googleanalytics extends Module
 	/**
 	 * hook save cart event to implement addtocart and remove from cart functionality
 	*/
-	public function hookActionCartSave($params)
+	public function hookActionCartSave()
 	{
 		$ga_scripts  = '';
 		if (!isset($this->context->cart))
 			return;
 		//Prestashop Bugs with post action wrong returning add with true.
-		$Cart = array(
+		$cart = array(
 			'controller' => Tools::getValue('controller'),
 			'addAction' => Tools::getValue('add') ? 'add':'',
 			'removeAction' => Tools::getValue('delete') ? 'delete':'',
@@ -784,30 +784,28 @@ class Googleanalytics extends Module
 			'qty'=> Tools::getValue('qty') ? :'1'
 			);
 		try {
-			$Cart_Products = $this->context->cart->getProducts();
+			$cart_products = $this->context->cart->getProducts();
 		} catch (Exception $e)
 		{
 			$ga_scripts .= '';
 		}
 
-		if (isset($Cart_Products))
+		if (isset($cart_products))
 		{
-			foreach ($Cart_Products as $cart_product)
+			foreach ($cart_products as $cart_product)
 			{
 				if ($cart_product['id_product'] == Tools::getValue('id_product'))
 				{
 					//
-					$Cart['attributes_small'] = $cart_product['attributes_small'];
+					$cart['attributes_small'] = $cart_product['attributes_small'];
 				}
 
 			}
 		}
 
-		$ga_products = $this->wrapProduct((int)Tools::getValue('id_product'), $Cart);
-		//print_r($Cart);
+		$ga_products = $this->wrapProduct((int)Tools::getValue('id_product'), $cart);
 
-
-		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down')
+		if ($cart['removeAction'] == 'delete' || $cart['extraAction'] == 'down')
 		{
 			//
 			$ga_scripts .= 'MBG.removeFromCart('.Tools::jsonEncode($ga_products).');';
