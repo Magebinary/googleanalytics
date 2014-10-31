@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 * 2007-2014 PrestaShop
 *
 * NOTICE OF LICENSE
@@ -22,7 +22,7 @@
 *  @copyright  2007-2014 PrestaShop SA
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
-*/
+**/
 
 if (!defined('_PS_VERSION_'))
 	exit;
@@ -31,6 +31,8 @@ class Googleanalytics extends Module
 {
 	protected $_js_state = 0;
 
+	protected $_eligible = 0;
+
 	/**
 	* initiate Google Analytics module
 	*/
@@ -38,7 +40,7 @@ class Googleanalytics extends Module
 	{
 		$this->name = 'googleanalytics';
 		$this->tab = 'analytics_stats';
-		$this->version = '0.9.2';
+		$this->version = '0.9.3';
 		$this->author = 'MageBinary';
 		$this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
 		$this->bootstrap = true;
@@ -53,7 +55,7 @@ class Googleanalytics extends Module
 	}
 
 	/**
-	* Module's installation 
+	* Module's installation
 	* @return bool
 	*/
 	public function install()
@@ -340,6 +342,7 @@ class Googleanalytics extends Module
 
 		if ($controller_name == 'order' )
 		{
+			$this->_eligible = 1;
 			$step = Tools::getValue('step');
 			if (empty($step))
 			{
@@ -348,15 +351,21 @@ class Googleanalytics extends Module
 			$ga_scripts .= $this->addProductFromCheckout($products, $step);
 			$ga_scripts .= "MBG.addCheckout('".$step."');";
 
+
 		}
 
 		if ($controller_name == 'order-confirmation' )
 		{
+			$this->_eligible = 1;
 			$ga_scripts .= $this->addCheckout($this->l('Order Confirmation'));
 		}
 
-		if (count($products) > 0) {
-			$ga_scripts .= $this->addProductImpression($products);
+		if (count($products) > 0)
+		{
+			if($this->_eligible == 0)
+			{
+				$ga_scripts .= $this->addProductImpression($products);
+			}
 			$ga_scripts .= $this->addProductClick($products);
 		}
 
@@ -384,7 +393,7 @@ class Googleanalytics extends Module
 	public function hookDisplayHome()
 	{
 		$ga_scripts = '';
-	
+
 		//add home featured products
 		if (!isset(HomeFeatured::$cache_products))
 		{
@@ -770,15 +779,16 @@ class Googleanalytics extends Module
 	 /**
 	 * hook save cart event to implement addtocart and remove from cart functionality
 	 */
-	public function hookActionCartSave()
+	public function hookActionCartSave($params)
 	{
 		if (!isset($this->context->cart))
 			return;
-
+		//Prestashop Bugs with post action wrong returning add with true.
 		$Cart = array(
+			'controller' => Tools::getValue('controller'),
 			'addAction' => Tools::getValue('add') ? 'add':'',
 			'removeAction' => Tools::getValue('delete') ? 'delete':'',
-			'extraAction' => Tools::getValue('op') ? 'down':'up',
+			'extraAction' => Tools::getValue('op'),
 			'qty'=> Tools::getValue('qty') ? :'1'
 			);
 		try {
@@ -803,13 +813,18 @@ class Googleanalytics extends Module
 		//print_r($Cart);
 
 		$ga_scripts  = '';
-
-		if ($Cart['addAction'] == 'add' || $Cart['extraAction'] == 'up') {
-			$ga_scripts .= "MBG.addToCart(".Tools::jsonEncode($ga_products).");";
-		}
-
-		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down') {
+		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down')
+		{
 			$ga_scripts .= "MBG.removeFromCart(".Tools::jsonEncode($ga_products).");";
+		}
+		else
+		{
+			//Sometime cartsave is called in checkout
+			if($step = Tools::getValue('step') <= 0)
+			{
+				$ga_scripts .= "MBG.addToCart(".Tools::jsonEncode($ga_products).");";
+			}
+
 		}
 
 		$this->context->cookie->__set('ga_cart', $this->context->cookie->__get('ga_cart').$ga_scripts);

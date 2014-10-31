@@ -14,6 +14,10 @@ var GoogleAnalyticEnhancedECommerce = {
         OrderFieldObject = ['id', 'affiliation', 'revenue', 'tax', 'shipping', 'coupon', 'list', 'step', 'option'];
 
         if (Product != null) {
+            if (Impression == true && Product.quantity !== undefined) {
+                delete Product.quantity;
+            }
+
             for (var key in Product) {
                 for (i = 0; i < ProductFieldObject.length; i++) {
                     if (key.toLowerCase() == ProductFieldObject[i]) {
@@ -121,22 +125,22 @@ var GoogleAnalyticEnhancedECommerce = {
 
     addProductClick: function(Product) {
 
-        var QuickView = jQuery('a[href$="'+Product.url+'"].quick-view');
+        var QuickView = jQuery('a[href$="' + Product.url + '"].quick-view');
         //console.log(QuickView);
         //if (QuickView ==! undefined) {
-            QuickView.on("click", function(event) {
-                GoogleAnalyticEnhancedECommerce.add(Product);
-                ga('ec:setAction', 'click', {
-                    list: Product.list
-                });
-
-                ga('send', 'event', 'Product Click', 'click', Product.list, {
-                    'hitCallback': function() {
-                        return !ga.loaded;
-                    }
-                });
-
+        QuickView.on("click", function(event) {
+            GoogleAnalyticEnhancedECommerce.add(Product);
+            ga('ec:setAction', 'click', {
+                list: Product.list
             });
+
+            ga('send', 'event', 'Product Click', 'click', Product.list, {
+                'hitCallback': function() {
+                    return !ga.loaded;
+                }
+            });
+
+        });
 
         //}
 
