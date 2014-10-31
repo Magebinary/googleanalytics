@@ -23,6 +23,7 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 **/
+
 if (!defined('_PS_VERSION_'))
 	exit;
 
@@ -62,20 +63,7 @@ class Googleanalytics extends Module
 		if (Shop::isFeatureActive())
 			Shop::setContext(Shop::CONTEXT_ALL);
 
-		if (!parent::install() ||
-			!$this->registerHook('header') ||
-			!$this->registerHook('adminOrder') ||
-			!$this->registerHook('footer') ||
-			!$this->registerHook('home') ||
-			!$this->registerHook('productfooter') ||
-			!$this->registerHook('shoppingCart') ||
-			!$this->registerHook('top') ||
-			!$this->registerHook('backOfficeHeader') ||
-			!$this->registerHook('displayBackOfficeHeader') ||
-			!$this->registerHook('actionProductCancel') ||
-			!$this->registerHook('actionCartSave') ||
-			!$this->registerHook('displayShoppingCart'))
-
+		if (!parent::install() || !$this->registerHook('header') || !$this->registerHook('adminOrder') || !$this->registerHook('footer') || !$this->registerHook('home') || !$this->registerHook('productfooter') || !$this->registerHook('shoppingCart') || !$this->registerHook('top') || !$this->registerHook('backOfficeHeader') || !$this->registerHook('displayBackOfficeHeader') || !$this->registerHook('actionProductCancel') || !$this->registerHook('actionCartSave') || !$this->registerHook('displayShoppingCart'))
 		return false;
 
 		//drop transaction table
