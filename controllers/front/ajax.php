@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 * 2007-2014 PrestaShop
 *
 * NOTICE OF LICENSE
@@ -22,7 +22,7 @@
 *  @copyright  2007-2014 PrestaShop SA
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
-*/
+**/
 
 /*
  * @since 1.5.0
@@ -34,7 +34,7 @@ class GoogleanalyticsAjaxModuleFrontController extends ModuleFrontController
 	 */
 	public function initContent()
 	{
-		if(Configuration::get('googleanalytics_enable'))
+		if (Configuration::get('googleanalytics_enable'))
 		{
 			parent::initContent();
 			Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'googleanalytics` SET sent=1, date_add=now() WHERE id_order = '.(int)Tools::getValue('orderid'));

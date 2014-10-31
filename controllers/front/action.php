@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 * 2007-2014 PrestaShop
 *
 * NOTICE OF LICENSE
@@ -22,7 +22,7 @@
 *  @copyright  2007-2014 PrestaShop SA
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
-*/
+**/
 
 /*
  * @since 1.5.0
@@ -34,7 +34,7 @@ class GoogleanalyticsActionModuleFrontController extends ModuleFrontController
 	 */
 	public function initContent()
 	{
-		if(Configuration::get('googleanalytics_enable'))
+		if (Configuration::get('googleanalytics_enable'))
 		{
 			parent::initContent();
 			die($this->context->cookie->__get('ga_add_cart'));
