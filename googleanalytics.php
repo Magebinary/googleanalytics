@@ -443,7 +443,7 @@ class Googleanalytics extends Module
 	/**
 	* wrap product to provide a standard product information for google analytics script
 	*/
-	public function wrapProduct($product, $extras, $index=0)
+	public function wrapProduct($product, $extras, $index = 0)
 	{
 		$cache_id = '';
 		$ga_product = '';
@@ -493,9 +493,9 @@ class Googleanalytics extends Module
 
 		}
 		/** Product Qty ***/
-	    if (isset($extras['qty']))
-	    {
-	    	//
+		if (isset($extras['qty']))
+		{
+			//
 			$product_qty = $extras['qty'];
 		}
 
@@ -532,7 +532,7 @@ class Googleanalytics extends Module
 			$product = new Product($product['id_product'], true, $this->context->language->id, $this->context->shop->id);
 
 			if (isset($product->link))
-				 $product_link = $product->link;
+				$product_link = $product->link;
 		}
 
 		if (Validate::isLoadedObject($product))
@@ -591,7 +591,7 @@ class Googleanalytics extends Module
 		if (!is_array($products))
 			return;
 		foreach ($products as $product)
-			$js .= "MBG.add(".Tools::jsonEncode($product).",'',true);";
+			$js .= 'MBG.add('.Tools::jsonEncode($product).",'',true);";
 
 		return $js;
 	}
@@ -749,9 +749,9 @@ class Googleanalytics extends Module
 	}
 
 
-	 /**
+	/**
 	 * hook admin office header to add google analytics js
-	 */
+	*/
 	public function hookActionProductCancel($params)
 	{
 		$qty_refunded = Tools::getValue('cancelQuantity');
@@ -779,11 +779,12 @@ class Googleanalytics extends Module
 	}
 
 
-	 /**
+	/**
 	 * hook save cart event to implement addtocart and remove from cart functionality
-	 */
+	*/
 	public function hookActionCartSave($params)
 	{
+		$ga_scripts  = '';
 		if (!isset($this->context->cart))
 			return;
 		//Prestashop Bugs with post action wrong returning add with true.
@@ -817,7 +818,7 @@ class Googleanalytics extends Module
 		$ga_products = $this->wrapProduct((int)Tools::getValue('id_product'), $Cart);
 		//print_r($Cart);
 
-		$ga_scripts  = '';
+
 		if ($Cart['removeAction'] == 'delete' || $Cart['extraAction'] == 'down')
 		{
 			//
