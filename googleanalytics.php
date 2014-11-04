@@ -33,6 +33,8 @@ class Googleanalytics extends Module
 
 	protected $_eligible = 0;
 
+	protected $_filterable = 1;
+
 	/**
 	* initiate Google Analytics module
 	*/
@@ -317,8 +319,10 @@ class Googleanalytics extends Module
 		);
 
 		$cart_actions = $this->context->cookie->__get('ga_cart');
+		//print_r($cart_actions);
 		if (isset($cart_actions))
 		{
+			$this->_filterable = 0;
 			$ga_scripts .= $cart_actions;
 			$this->context->cookie->__unset('ga_cart');
 		}
@@ -342,28 +346,26 @@ class Googleanalytics extends Module
 		if (count($products) > 0)
 		{
 			if ($this->_eligible == 0)
-				$ga_scripts .= $this->addProductImpression($products);
+			$ga_scripts .= $this->addProductImpression($products);
 			$ga_scripts .= $this->addProductClick($products);
 		}
 
 		return $this->runJS($ga_scripts);
 
 	}
-	/***
-	public function canShowJs() {
 
-		$bannedControllers = array('product','index');
-		$controller_name = Tools::getValue('controller');
-		$ban = false;
-		foreach ($bannedControllers as $_controller) {
-			if ($controller_name == $_controller) {
-				$ban = true;
-			}
+	protected function filter($ga_scripts) 
+	{
+		if ($this->_filterable = 1) 
+		{
+			$fliter = explode(';', $ga_scripts);
+			$fliter = array_unique($fliter);
+			$fliter = implode(';', $fliter);
+			$ga_scripts = $fliter;
 		}
-		return $ban;
-
+		return $ga_scripts;
 	}
-	****/
+
 	/**
 	* hook home to display generate the product list associated to home featured, news products and best sellers Modules
 	*/
@@ -411,7 +413,7 @@ class Googleanalytics extends Module
 			$ga_scripts .= $this->addProductClick($ga_homebestsell_product_list);
 		}
 
-		return $this->runJS($ga_scripts);
+		return $this->runJS($this->filter($ga_scripts));
 	}
 
 	/**

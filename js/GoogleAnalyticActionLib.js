@@ -1,27 +1,27 @@
 /**
-* 2007-2014 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2014 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-**/
+ * 2007-2014 PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author    PrestaShop SA <contact@prestashop.com>
+ *  @copyright 2007-2014 PrestaShop SA
+ *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *  International Registered Trademark & Property of PrestaShop SA
+ **/
 var GoogleAnalyticEnhancedECommerce = {
 
     setCurrency: function(Currency) {
@@ -65,9 +65,6 @@ var GoogleAnalyticEnhancedECommerce = {
                 }
 
             }
-
-            //console.log(Orders);
-
         }
 
 
@@ -86,7 +83,7 @@ var GoogleAnalyticEnhancedECommerce = {
     addProductDetailView: function(Product) {
         this.add(Product);
         ga('ec:setAction', 'detail');
-        //ga('send', 'pageview');
+        ga('send', 'event', 'UX', 'click', 'Product Detail View');
     },
 
     addToCart: function(Product) {
@@ -143,31 +140,25 @@ var GoogleAnalyticEnhancedECommerce = {
             'id': Order.Id, // Transaction ID is required for partial refund.
         });
         //ga('send', 'pageview');
-
-
     },
 
     addProductClick: function(Product) {
 
-        var QuickView = jQuery('a[href$="' + Product.url + '"].quick-view');
-        //console.log(QuickView);
-        //if (QuickView ==! undefined) {
-        QuickView.on("click", function(event) {
+        var ClickPoint = jQuery('a[href$="' + Product.url + '"].quick-view');
+
+        ClickPoint.on("click", function(event) {
             GoogleAnalyticEnhancedECommerce.add(Product);
             ga('ec:setAction', 'click', {
                 list: Product.list
             });
 
-            ga('send', 'event', 'Product Click', 'click', Product.list, {
+            ga('send', 'event', 'Product Quick View', 'click', Product.list, {
                 'hitCallback': function() {
                     return !ga.loaded;
                 }
             });
 
         });
-
-        //}
-
 
     },
 
