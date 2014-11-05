@@ -678,10 +678,7 @@ class Googleanalytics extends Module
 		$currency = $this->context->currency->iso_code;
 		$js = "
 			<script>
-
 				jQuery(document).ready(function(){
-					var ga_prestashop_developerid='';
-					(window.gaDevIDs=window.gaDevIds||[]).push(ga_prestashop_developerid);
 					var MBG = GoogleAnalyticEnhancedECommerce;
 					MBG.setCurrency('$currency');
 					".
